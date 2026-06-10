@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mood Tracker — MindSpace</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+
+    .mood-page { background: var(--ivory); }
+
+    /* ---- LAYOUT ---- */
+    .tracker-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 28px;
+      padding: 48px 5% 72px;
+      max-width: 1160px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    /* ---- LEFT: CHECK-IN ---- */
+    .checkin-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .checkin-header {
+      background: var(--forest);
+      padding: 28px 32px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .checkin-header::after {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(122,171,138,0.2);
+      pointer-events: none;
+    }
+
+    .checkin-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+      position: relative; z-index: 1;
+    }
+
+    .checkin-header p {
+      opacity: 0.75;
+      font-size: 0.88rem;
+      position: relative; z-index: 1;
+    }
+
+    .date-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85);
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-top: 12px;
+      position: relative; z-index: 1;
+    }
+
+    .checkin-body { padding: 32px; }
+
+    /* Mood emoji row */
+    .mood-label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--ink-mid);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mood-label::after {
+      content: 'required';
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--ink-xlight);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .emoji-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .emoji-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 8px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background: var(--ivory);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--ink-light);
+      transition: all 0.2s var(--ease-spring);
+      position: relative;
+    }
+
+    .emoji-btn .em {
+      font-size: 2rem;
+      line-height: 1;
+      transition: transform 0.2s var(--ease-spring);
+    }
+
+    .emoji-btn:hover { transform: translateY(-2px); border-color: var(--sage); }
+    .emoji-btn:hover .em { transform: scale(1.15); }
+
+    .emoji-btn.selected {
+      border-color: var(--forest);
+      background: var(--sage-xlight);
+      color: var(--forest);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 16px rgba(26,60,46,0.15);
+    }
+
+    .emoji-btn.selected .em { transform: scale(1.2); }
+
+    .emoji-btn.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 6px; right: 8px;
+      font-size: 0.65rem;
+      color: var(--forest);
+      font-weight: 900;
+    }
+
+    /* Sliders */
+    .slider-group { margin-bottom: 26px; }
+
+    .slider-group .slider-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .slider-group label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--ink-mid);
+    }
+
+    .slider-val {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--forest);
+      background: var(--sage-xlight);
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+
+    .slider-hints {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--ink-xlight);
+      margin-top: 5px;
+      font-family: var(--font-mono);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--forest);
+      height: 6px;
+      cursor: pointer;
+    }
+
+    /* Tags */
+    .tag-section-label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--ink-mid);
+      margin-bottom: 12px;
+    }
+
+    .tag-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .tag-chip {
+      padding: 7px 14px;
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      background: var(--ivory);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.15s var(--ease);
+    }
+
+    .tag-chip:hover { border-color: var(--sage); color: var(--forest); }
+    .tag-chip.selected {
+      border-color: var(--forest);
+      background: var(--sage-xlight);
+      color: var(--forest);
+    }
+
+    .save-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .saved-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--forest-lit);
+      font-family: var(--font-mono);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .saved-pill.show { opacity: 1; }
+
+    /* ---- RIGHT SIDEBAR ---- */
+    .tracker-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Weekly history */
+    .weekly-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .weekly-card-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .weekly-card-header h3 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--gold);
+      font-family: var(--font-mono);
+      background: var(--gold-xlight);
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+
+    .weekly-body { padding: 18px 22px; }
+
+    .history-day {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 11px;
+    }
+
+    .history-day:last-child { margin-bottom: 0; }
+
+    .day-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ink-xlight);
+      width: 30px;
+      font-family: var(--font-mono);
+    }
+
+    .history-bar-track {
+      flex: 1;
+      height: 9px;
+      background: var(--ivory-dark);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .history-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1s var(--ease);
+    }
+
+    .day-mood-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--ink-light);
+      width: 48px;
+      text-align: right;
+      font-family: var(--font-mono);
+    }
+
+    /* Tips card */
+    .tips-card {
+      background: var(--forest);
+      border-radius: var(--radius-md);
+      padding: 24px 22px;
+      color: white;
+    }
+
+    .tips-card h3 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 400;
+      color: white;
+      margin-bottom: 14px;
+    }
+
+    .tips-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .tips-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.83rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.6;
+    }
+
+    .tips-list li .tip-dot {
+      width: 5px; height: 5px;
+      background: var(--sage);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 7px;
+    }
+
+    /* Emergency card */
+    .emergency-card {
+      background: white;
+      border: 1.5px solid #fca5a5;
+      border-radius: var(--radius-md);
+      padding: 22px;
+    }
+
+    .emergency-card h4 {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 400;
+      color: #dc2626;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .emergency-card p {
+      font-size: 0.83rem;
+      color: var(--ink-light);
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .emergency-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      transition: background 0.15s;
+    }
+
+    .emergency-link:last-child { margin-bottom: 0; }
+    .emergency-link.red { background: #fef2f2; color: #dc2626; }
+    .emergency-link.red:hover { background: #fee2e2; }
+    .emergency-link.blue { background: var(--sky-light); color: var(--sky); }
+    .emergency-link.blue:hover { background: #c8e3f0; }
+    .emergency-link.green { background: var(--sage-xlight); color: var(--forest); }
+    .emergency-link.green:hover { background: var(--sage-light); }
+
+    /* ---- BREATHING SECTION ---- */
+    .breathing-section {
+      background: var(--ivory-dark);
+      padding: 72px 5%;
+    }
+
+    .breathing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      max-width: 1000px;
+      margin: 48px auto 0;
+    }
+
+    .breathing-widget {
+      text-align: center;
+    }
+
+    .breath-ring {
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      border: 3px solid var(--sage);
+      margin: 0 auto 24px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+
+    .breath-ring-inner {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: var(--sage-xlight);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--forest);
+      transition: transform 0.1s;
+    }
+
+    .breath-ring.inhale .breath-ring-inner { animation: expand 4s ease-in-out; }
+    .breath-ring.exhale .breath-ring-inner { animation: shrink 8s ease-in-out; }
+
+    @keyframes expand {
+      from { transform: scale(0.85); }
+      to   { transform: scale(1.1); }
+    }
+    @keyframes shrink {
+      from { transform: scale(1.1); }
+      to   { transform: scale(0.85); }
+    }
+
+    .breath-controls { display: flex; gap: 10px; justify-content: center; }
+
+    .breath-btn {
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-family: var(--font-body);
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .breath-btn-start { background: var(--forest); color: white; }
+    .breath-btn-start:hover { background: var(--forest-mid); }
+    .breath-btn-reset { background: var(--ivory-dark); color: var(--ink-mid); }
+    .breath-btn-reset:hover { background: var(--border); }
+
+    .breathing-tips-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .breathing-tips-list li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .breathing-tips-list li .num {
+      width: 28px; height: 28px;
+      background: var(--forest);
+      color: white;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .breathing-tips-list li p {
+      font-size: 0.88rem;
+      color: var(--ink-light);
+      line-height: 1.65;
+    }
+
+    .breathing-tips-list li p strong { color: var(--ink); }
+
+    @media (max-width: 1000px) {
+      .tracker-layout { grid-template-columns: 1fr; }
+      .tracker-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
+
+    @media (max-width: 700px) {
+      .tracker-layout { padding: 32px 4% 60px; }
+      .tracker-sidebar { grid-template-columns: 1fr; }
+      .emoji-row { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+      .emoji-btn .em { font-size: 1.5rem; }
+      .breathing-grid { grid-template-columns: 1fr; gap: 36px; }
+    }
+  </style>
+</head>
+<body class="mood-page">
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <span class="logo-leaf">🌿</span> MindSpace
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About Us</a></li>
+    <li><a href="mood.html" class="active">Mood Tracker</a></li>
+    <li><a href="journal.html">Journal</a></li>
+    <li><a href="contact.php" class="btn-nav">Contact Us</a></li>
+  </ul>
+  <button class="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+</nav>
+
+<header class="page-hero">
+  <p class="breadcrumb"><a href="index.html">Home</a> › Mood Tracker</p>
+  <h1>Daily Mood Check-In</h1>
+  <p class="hero-sub">Take a moment to check in with yourself. Understanding your emotional patterns is the first step toward wellness.</p>
+</header>
+
+<main>
+  <div class="tracker-layout">
+
+    <!-- LEFT: FORM -->
+    <div>
+      <div class="checkin-card">
+        <div class="checkin-header">
+          <h2>How are you feeling today?</h2>
+          <p>Your response is completely private — only you can see it.</p>
+          <div class="date-chip"><i class="fa fa-calendar-day fa-sm"></i> <span id="todayDate">Loading…</span></div>
+        </div>
+        <div class="checkin-body">
+
+          <p class="mood-label">Select your overall mood</p>
+          <div class="emoji-row">
+            <button class="emoji-btn" onclick="selectMood(this)" data-mood="Terrible" data-val="10" type="button">
+              <span class="em">😞</span> Terrible
+            </button>
+            <button class="emoji-btn" onclick="selectMood(this)" data-mood="Bad" data-val="30" type="button">
+              <span class="em">😔</span> Bad
+            </button>
+            <button class="emoji-btn" onclick="selectMood(this)" data-mood="Okay" data-val="55" type="button">
+              <span class="em">😐</span> Okay
+            </button>
+            <button class="emoji-btn" onclick="selectMood(this)" data-mood="Good" data-val="78" type="button">
+              <span class="em">😊</span> Good
+            </button>
+            <button class="emoji-btn" onclick="selectMood(this)" data-mood="Amazing" data-val="100" type="button">
+              <span class="em">🤩</span> Amazing
+            </button>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-top">
+              <label for="energyRange">Energy Level</label>
+              <span class="slider-val" id="energyVal">5</span>
+            </div>
+            <input type="range" id="energyRange" min="1" max="10" value="5"
+                   oninput="document.getElementById('energyVal').textContent = this.value"/>
+            <div class="slider-hints"><span>Exhausted</span><span>Energised</span></div>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-top">
+              <label for="stressRange">Stress Level</label>
+              <span class="slider-val" id="stressVal">3</span>
+            </div>
+            <input type="range" id="stressRange" min="1" max="10" value="3"
+                   oninput="document.getElementById('stressVal').textContent = this.value"/>
+            <div class="slider-hints"><span>Calm</span><span>Overwhelmed</span></div>
+          </div>
+
+          <p class="tag-section-label">What's contributing to your mood? <span style="font-weight:400; color:var(--ink-xlight); font-size:0.8rem;">(Pick all that apply)</span></p>
+          <div class="tag-grid" id="tagGrid">
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">📚 Study pressure</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">😴 Poor sleep</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">🍽️ Missed meals</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">🤝 Social support</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">💰 Money worries</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">🏃 Exercise</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">🧘 Meditation</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">👨‍👩‍👧 Family</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">📱 Too much screen time</button>
+            <button class="tag-chip" onclick="toggleTag(this)" type="button">☀️ Good day overall</button>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="moodNote">Anything on your mind? <span style="font-weight:400; color:var(--ink-xlight);">(Optional)</span></label>
+            <textarea id="moodNote" rows="3" placeholder="A brief note about how your day is going…"></textarea>
+          </div>
+
+          <div class="save-strip" style="margin-top:24px;">
+            <span class="saved-pill" id="savedPill"><i class="fa fa-check-circle"></i> Entry saved!</span>
+            <button class="btn btn-primary" onclick="saveMood()" type="button">
+              Save Check-In <i class="fa fa-arrow-right fa-sm"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="tracker-sidebar">
+
+      <!-- Weekly history -->
+      <div class="weekly-card">
+        <div class="weekly-card-header">
+          <h3>This Week</h3>
+          <div class="streak-badge"><i class="fa fa-fire fa-sm"></i> 3-day streak</div>
+        </div>
+        <div class="weekly-body" id="historyBar"></div>
+      </div>
+
+      <!-- Tips -->
+      <div class="tips-card">
+        <h3>🌿 Quick Wellness Tips</h3>
+        <ul class="tips-list">
+          <li><span class="tip-dot"></span> Aim for 7–9 hours of sleep and keep a consistent schedule.</li>
+          <li><span class="tip-dot"></span> A 20-minute walk can lift your mood and reduce cortisol.</li>
+          <li><span class="tip-dot"></span> Try 4-7-8 breathing: inhale 4 sec, hold 7, exhale 8.</li>
+          <li><span class="tip-dot"></span> Writing about feelings for 10 min/day reduces tension over time.</li>
+          <li><span class="tip-dot"></span> Stay hydrated — dehydration worsens anxiety and fatigue.</li>
+        </ul>
+      </div>
+
+      <!-- Emergency -->
+      <div class="emergency-card">
+        <h4><i class="fa fa-heart-pulse"></i> Need Support Now?</h4>
+        <p>If you're feeling overwhelmed or in crisis, please reach out immediately.</p>
+        <a href="tel:+256800100066" class="emergency-link red"><i class="fa fa-phone-volume fa-sm"></i> Emergency: 0800 100 066</a>
+        <a href="tel:+256772100001" class="emergency-link blue"><i class="fa fa-user-doctor fa-sm"></i> Campus Counselor</a>
+        <a href="contact.php" class="emergency-link green"><i class="fa fa-envelope fa-sm"></i> Message Us</a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- BREATHING SECTION -->
+<section class="breathing-section">
+  <div style="text-align:center;">
+    <span class="section-eyebrow">Breathe</span>
+    <h2 class="section-title">Feeling stressed? <em>Try this</em></h2>
+    <p class="section-sub" style="margin:0 auto;">The 4-7-8 breathing technique calms your nervous system in minutes.</p>
+  </div>
+  <div class="breathing-grid">
+    <div class="breathing-widget">
+      <div class="breath-ring" id="breathRing">
+        <div class="breath-ring-inner" id="breathText">Press Start</div>
+      </div>
+      <div class="breath-controls">
+        <button class="breath-btn breath-btn-start" id="breathStart" onclick="startBreathing()">Start</button>
+        <button class="breath-btn breath-btn-reset" onclick="resetBreathing()">Reset</button>
+      </div>
+      <p style="margin-top:14px; font-size:0.8rem; color:var(--ink-xlight); font-family:var(--font-mono);" id="breathCycle">Cycle: 0 / 3</p>
+    </div>
+    <div>
+      <span class="section-eyebrow">How it works</span>
+      <h3 class="section-title" style="font-size:1.4rem;">4 – 7 – 8 Technique</h3>
+      <ul class="breathing-tips-list" style="margin-top:20px;">
+        <li>
+          <div class="num">4</div>
+          <p><strong>Inhale through your nose</strong> for 4 seconds. Let your chest and belly expand fully.</p>
+        </li>
+        <li>
+          <div class="num">7</div>
+          <p><strong>Hold your breath</strong> for 7 seconds. Keep your body still and your mind focused.</p>
+        </li>
+        <li>
+          <div class="num">8</div>
+          <p><strong>Exhale completely</strong> through your mouth for 8 seconds. Release all tension with the breath.</p>
+        </li>
+        <li>
+          <div class="num">3</div>
+          <p><strong>Repeat 3 cycles</strong> for the best effect. You should feel calmer within one minute.</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="logo-text">🌿 MindSpace</span>
+      <p>A digital mental wellness platform built by students of Mbarara University of Science and Technology.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Pages</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="mood.html">Mood Tracker</a></li>
+        <li><a href="journal.html">Journal</a></li>
+        <li><a href="contact.php">Contact Us</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Emergency Help</h4>
+      <ul>
+        <li><a href="tel:+256800100066">Uganda Helpline: 0800 100 066</a></li>
+        <li><a href="tel:+256414340869">Mental Health Uganda</a></li>
+        <li><a href="tel:+256772100001">Campus Counselor</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 MindSpace — MUST · Faculty of Computing and Informatics</p>
+    <p>Built with ❤️ by Group Two, BIT Program</p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+  /* ---- DATE ---- */
+  document.getElementById('todayDate').textContent =
+    new Date().toLocaleDateString('en-UG', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  /* ---- MOOD SELECT ---- */
+  let selectedMood = null;
+  function selectMood(btn) {
+    document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedMood = btn.dataset.mood;
+  }
+
+  /* ---- TAG TOGGLE ---- */
+  function toggleTag(btn) { btn.classList.toggle('selected'); }
+
+  /* ---- SAVE MOOD ---- */
+  const MOOD_KEY = 'mindspace_moods';
+  function loadMoods() {
+    try { return JSON.parse(localStorage.getItem(MOOD_KEY)) || []; } catch(e) { return []; }
+  }
+
+  function saveMood() {
+    if (!selectedMood) { alert('Please select a mood first.'); return; }
+    const moods = loadMoods();
+    const tags = Array.from(document.querySelectorAll('.tag-chip.selected')).map(t => t.textContent.trim());
+    const entry = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('en-UG', { weekday:'short', month:'short', day:'numeric' }),
+      mood: selectedMood,
+      energy: document.getElementById('energyRange').value,
+      stress: document.getElementById('stressRange').value,
+      note: document.getElementById('moodNote').value,
+      tags
+    };
+    moods.unshift(entry);
+    if (moods.length > 90) moods.pop();
+    localStorage.setItem(MOOD_KEY, JSON.stringify(moods));
+    renderHistory();
+    const p = document.getElementById('savedPill');
+    p.classList.add('show');
+    setTimeout(() => p.classList.remove('show'), 2500);
+  }
+
+  /* ---- WEEKLY BARS ---- */
+  const moodColors = {
+    Terrible: '#e07055', Bad: '#e09a55', Okay: '#c8b944', Good: '#7aab8a', Amazing: '#3d7a5c'
+  };
+  const moodPcts = { Terrible:10, Bad:30, Okay:55, Good:78, Amazing:100 };
+
+  function renderHistory() {
+    const moods = loadMoods();
+    const hb = document.getElementById('historyBar');
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const today = new Date();
+    let html = '';
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today); d.setDate(today.getDate() - i);
+      const dayLabel = days[d.getDay()];
+      const dateStr = d.toLocaleDateString('en-UG', { weekday:'short', month:'short', day:'numeric' });
+      const found = moods.find(m => m.date === dateStr);
+      const pct = found ? moodPcts[found.mood] || 50 : 0;
+      const color = found ? (moodColors[found.mood] || 'var(--sage)') : 'var(--border)';
+      const label = found ? found.mood : '—';
+      html += `<div class="history-day">
+        <span class="day-label">${dayLabel}</span>
+        <div class="history-bar-track">
+          <div class="history-bar-fill" style="width:${pct}%; background:${color};"></div>
+        </div>
+        <span class="day-mood-label">${label}</span>
+      </div>`;
+    }
+    hb.innerHTML = html || '<p style="font-size:0.8rem;color:var(--ink-xlight);padding:8px 0;">No entries yet this week.</p>';
+  }
+
+  renderHistory();
+
+  /* ---- BREATHING EXERCISE ---- */
+  let breathInterval = null;
+  let breathRunning = false;
+  let cycleCount = 0;
+  const maxCycles = 3;
+
+  const phases = [
+    { label: 'Inhale…', dur: 4000, class: 'inhale' },
+    { label: 'Hold…',   dur: 7000, class: '' },
+    { label: 'Exhale…', dur: 8000, class: 'exhale' },
+  ];
+
+  function startBreathing() {
+    if (breathRunning) return;
+    breathRunning = true;
+    cycleCount = 0;
+    document.getElementById('breathStart').disabled = true;
+    runCycle();
+  }
+
+  function runCycle() {
+    if (cycleCount >= maxCycles) { resetBreathing(); return; }
+    let pi = 0;
+    const ring = document.getElementById('breathRing');
+    const txt  = document.getElementById('breathText');
+
+    function nextPhase() {
+      if (pi >= phases.length) { cycleCount++; document.getElementById('breathCycle').textContent = `Cycle: ${cycleCount} / ${maxCycles}`; runCycle(); return; }
+      const phase = phases[pi];
+      ring.className = 'breath-ring ' + phase.class;
+      txt.textContent = phase.label;
+      pi++;
+      breathInterval = setTimeout(nextPhase, phase.dur);
+    }
+    nextPhase();
+  }
+
+  function resetBreathing() {
+    clearTimeout(breathInterval);
+    breathRunning = false;
+    cycleCount = 0;
+    document.getElementById('breathRing').className = 'breath-ring';
+    document.getElementById('breathText').textContent = 'Press Start';
+    document.getElementById('breathCycle').textContent = 'Cycle: 0 / 3';
+    document.getElementById('breathStart').disabled = false;
+  }
+</script>
+</body>
+</html>
