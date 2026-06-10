@@ -1,0 +1,168 @@
+    .page-hero { background: #6a3dbf; }
+
+    .contact-wrap {
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 0 5% 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .info-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px 24px;
+    }
+
+    .info-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+
+    .contact-row:last-child { border-bottom: none; }
+
+    .contact-row i {
+      color: var(--sky-dark);
+      width: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .contact-row .label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .contact-row a {
+      color: var(--sky-dark);
+      font-weight: 600;
+    }
+
+    /* COUNSELORS */
+    .counselor-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .counselor-item:last-child { border-bottom: none; }
+
+    .c-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+
+    .counselor-item h5 { font-size: 0.86rem; font-weight: 700; }
+    .counselor-item p  { font-size: 0.75rem; color: var(--text-light); }
+
+    .counselor-item a.call-btn {
+      margin-left: auto;
+      background: var(--sky-light);
+      color: var(--sky-dark);
+      padding: 5px 11px;
+      border-radius: 20px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* HOURS */
+    .hours-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.86rem;
+    }
+
+    .hours-row:last-child { border-bottom: none; }
+
+    /* EMERGENCY */
+    .emergency-section {
+      background: #7f1d1d;
+      padding: 50px 5%;
+      text-align: center;
+      color: white;
+    }
+
+    .emergency-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: #fca5a5;
+      margin-bottom: 8px;
+    }
+
+    .emergency-section p {
+      max-width: 480px;
+      margin: 0 auto 24px;
+      opacity: 0.85;
+      font-size: 0.9rem;
+    }
+
+    .emer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .emer-card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+      padding: 16px 14px;
+      text-align: center;
+    }
+
+    .emer-card h4 { font-size: 0.8rem; font-weight: 700; color: #fca5a5; margin-bottom: 5px; }
+    .emer-card a  { font-size: 0.95rem; font-weight: 800; color: white; display: block; }
+    .emer-card span { font-size: 0.72rem; opacity: 0.6; }
+
+    /* WhatsApp */
+    .wa-card {
+      background: #128C7E;
+      border-radius: 10px;
+      padding: 22px 24px;
+      color: white;
+    }
+
+    .wa-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .wa-card p  { font-size: 0.86rem; opacity: 0.85; margin-bottom: 14px; line-height: 1.6; }
+
+    .wa-card a {
+      background: white;
+      color: #128C7E;
+      font-weight: 700;
+      font-size: 0.86rem;
+      padding: 9px 18px;
+      border-radius: 6px;
+      display: inline-block;
+    }
