@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Journal — MindSpace</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+
+    body { background: var(--ivory); }
+
+    /* ---- LAYOUT ---- */
+    .journal-wrap {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+      height: calc(100vh - 68px);
+      overflow: hidden;
+    }
+
+    /* ---- SIDEBAR ---- */
+    .journal-sidebar {
+      background: var(--forest);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .sidebar-top {
+      padding: 20px 18px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: white;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-meta {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.45);
+      font-family: var(--font-mono);
+    }
+
+    .new-entry-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--sage);
+      color: white;
+      border: none;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      margin-top: 12px;
+      transition: background 0.2s;
+    }
+
+    .new-entry-btn:hover { background: #6a9b7a; }
+
+    .search-box {
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px 8px 32px;
+      color: white;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      outline: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .search-box input::placeholder { color: rgba(255,255,255,0.35); }
+    .search-box input:focus { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); }
+
+    .search-box i {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.35);
+      font-size: 0.75rem;
+    }
+
+    /* Entries list */
+    .entries-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 0;
+    }
+
+    .entries-list::-webkit-scrollbar { width: 3px; }
+    .entries-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+
+    .entry-item {
+      padding: 13px 18px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .entry-item:hover { background: rgba(255,255,255,0.06); }
+    .entry-item.active { background: rgba(122,171,138,0.2); }
+    .entry-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--sage-light);
+    }
+
+    .ei-date {
+      font-family: var(--font-mono);
+      font-size: 0.67rem;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 3px;
+    }
+
+    .ei-title {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .ei-preview {
+      font-size: 0.76rem;
+      color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ei-tags {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .ei-tag {
+      font-size: 0.65rem;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-family: var(--font-mono);
+    }
+
+    .entry-item.active .ei-tag {
+      background: rgba(122,171,138,0.3);
+      color: var(--sage-light);
+    }
+
+    .no-entries-msg {
+      padding: 24px 18px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      font-family: var(--font-mono);
+    }
+
+    /* ---- MAIN EDITOR ---- */
+    .journal-main {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: white;
+    }
+
+    /* Toolbar */
+    .editor-toolbar {
+      padding: 12px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--ivory);
+      flex-shrink: 0;
+    }
+
+    .toolbar-left { display: flex; align-items: center; gap: 10px; }
+    .toolbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .word-count-badge {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--ink-xlight);
+      background: var(--border);
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+
+    .mood-tag-select {
+      padding: 5px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--ink-mid);
+      background: white;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      padding: 6px 12px;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-family: var(--font-body);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .delete-btn:hover { background: #fee2e2; }
+
+    /* Editor area */
+    .editor-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 36px 40px;
+    }
+
+    #entryTitle {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: var(--ink);
+      background: transparent;
+      box-sizing: border-box;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    #entryTitle::placeholder { color: var(--border-dark); }
+
+    .entry-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 18px;
+      border-bottom: 1px dashed var(--border);
+      margin-bottom: 24px;
+    }
+
+    .meta-date {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--ink-xlight);
+    }
+
+    .mood-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--sage);
+      display: none;
+    }
+
+    #entryBody {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.95;
+      color: var(--ink);
+      resize: none;
+      min-height: 300px;
+      background: transparent;
+      box-sizing: border-box;
+    }
+
+    #entryBody::placeholder { color: var(--border-dark); }
+
+    /* Footer save */
+    .editor-footer {
+      padding: 12px 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--ivory);
+      flex-shrink: 0;
+    }
+
+    .save-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--ink-xlight);
+    }
+
+    .save-status.saved { color: var(--forest-lit); }
+    .save-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 20px; opacity: 0.4; }
+    .empty-state h3 { font-family: var(--font-display); font-size: 1.3rem; color: var(--ink-light); margin-bottom: 8px; }
+    .empty-state p { font-size: 0.88rem; color: var(--ink-xlight); max-width: 280px; line-height: 1.7; margin-bottom: 20px; }
+
+    /* ---- PROMPTS PANEL ---- */
+    .prompts-panel {
+      background: var(--ivory-dark);
+      border-top: 1px solid var(--border);
+      padding: 14px 28px;
+      flex-shrink: 0;
+    }
+
+    .prompts-panel h4 {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-xlight);
+      margin-bottom: 10px;
+    }
+
+    .prompts-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .prompt-chip {
+      padding: 6px 13px;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      font-size: 0.78rem;
+      color: var(--ink-mid);
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .prompt-chip:hover {
+      border-color: var(--forest);
+      color: var(--forest);
+      background: var(--sage-xlight);
+    }
+
+    /* ---- SCIENCE SECTION ---- */
+    .benefits-section {
+      background: var(--ivory);
+      padding: 72px 5%;
+    }
+
+    .benefits-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: start;
+      max-width: 1100px;
+      margin: 48px auto 0;
+    }
+
+    .benefit-item {
+      display: flex;
+      gap: 18px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .benefit-item:last-child { border-bottom: none; }
+
+    .benefit-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: var(--border-dark);
+      line-height: 1;
+      flex-shrink: 0;
+      width: 40px;
+      text-align: right;
+    }
+
+    .benefit-item h4 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .benefit-item p {
+      font-size: 0.86rem;
+      color: var(--ink-light);
+      line-height: 1.65;
+    }
+
+    .quote-panel {
+      background: var(--forest);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      color: white;
+      position: sticky;
+      top: 90px;
+    }
+
+    .quote-panel .quote-mark {
+      font-family: var(--font-display);
+      font-size: 5rem;
+      color: rgba(255,255,255,0.15);
+      line-height: 0.5;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .quote-panel blockquote {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 1.2rem;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .quote-panel cite {
+      font-size: 0.76rem;
+      color: rgba(255,255,255,0.45);
+      font-style: normal;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .quote-panel .tip-block {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .quote-panel .tip-block p {
+      font-size: 0.84rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .quote-panel .tip-block p:last-child { margin-bottom: 0; }
+
+    @media (max-width: 900px) {
+      .journal-wrap { height: auto; grid-template-columns: 1fr; }
+      .journal-sidebar { height: 280px; }
+      .journal-main { min-height: 500px; }
+      .benefits-layout { grid-template-columns: 1fr; gap: 36px; }
+    }
+
+    @media (max-width: 640px) {
+      .editor-area { padding: 24px 20px; }
+      #entryTitle { font-size: 1.5rem; }
+      .editor-toolbar { padding: 10px 16px; }
+      .editor-footer { padding: 10px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <span class="logo-leaf">🌿</span> MindSpace
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About Us</a></li>
+    <li><a href="mood.html">Mood Tracker</a></li>
+    <li><a href="journal.html" class="active">Journal</a></li>
+    <li><a href="contact.php" class="btn-nav">Contact Us</a></li>
+  </ul>
+  <button class="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+</nav>
+
+<header class="page-hero">
+  <p class="breadcrumb"><a href="index.html">Home</a> › Journal</p>
+  <h1>Your Digital Journal</h1>
+  <p class="hero-sub">A private, safe space to write freely. Your words are yours alone — no one else can see them.</p>
+</header>
+
+<!-- JOURNAL APP -->
+<div class="journal-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="journal-sidebar">
+    <div class="sidebar-top">
+      <p class="sidebar-title">My Journal</p>
+      <p class="sidebar-meta" id="entryCountLabel">0 entries</p>
+      <button class="new-entry-btn" onclick="newEntry()" type="button">
+        <i class="fa fa-plus fa-sm"></i> New Entry
+      </button>
+      <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input type="text" placeholder="Search entries…" oninput="filterEntries(this.value)" id="searchInput"/>
+      </div>
+    </div>
+    <div class="entries-list" id="entriesList"></div>
+  </aside>
+
+  <!-- EDITOR -->
+  <div class="journal-main" id="journalMain">
+
+    <!-- Empty state (shown when no entry selected) -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📖</div>
+      <h3>No entry selected</h3>
+      <p>Create a new entry or select one from the sidebar to start writing.</p>
+      <button class="btn btn-primary" onclick="newEntry()" type="button">
+        <i class="fa fa-plus fa-sm"></i> New Entry
+      </button>
+    </div>
+
+    <!-- Editor (hidden until entry selected) -->
+    <div id="editorContainer" style="display:none; flex:1; display:none; flex-direction:column; overflow:hidden;">
+
+      <div class="editor-toolbar">
+        <div class="toolbar-left">
+          <span class="word-count-badge" id="wordCount">0 words</span>
+          <select class="mood-tag-select" id="entryMood" onchange="updateMoodDot()">
+            <option value="">— Mood tag —</option>
+            <option value="😞 Struggling">😞 Struggling</option>
+            <option value="😔 Low">😔 Low</option>
+            <option value="😐 Neutral">😐 Neutral</option>
+            <option value="😊 Good">😊 Good</option>
+            <option value="🤩 Great">🤩 Great</option>
+            <option value="😤 Frustrated">😤 Frustrated</option>
+            <option value="😰 Anxious">😰 Anxious</option>
+            <option value="😌 Peaceful">😌 Peaceful</option>
+            <option value="💪 Motivated">💪 Motivated</option>
+            <option value="🥺 Sad">🥺 Sad</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <button class="delete-btn" onclick="deleteEntry()" type="button">
+            <i class="fa fa-trash fa-sm"></i> Delete
+          </button>
+        </div>
+      </div>
+
+      <div class="editor-area">
+        <input type="text" id="entryTitle" placeholder="Give this entry a title…" maxlength="80"
+               oninput="triggerAutoSave()"/>
+        <div class="entry-meta-row">
+          <span class="meta-date" id="editorDate">—</span>
+          <span class="mood-dot" id="moodDot"></span>
+          <span class="meta-date" id="moodLabel" style="color:var(--ink-mid);"></span>
+        </div>
+        <textarea id="entryBody"
+          placeholder="Start writing your thoughts here… There's no right or wrong way to journal. Write freely."
+          oninput="updateWordCount(); triggerAutoSave()"></textarea>
+      </div>
+
+      <div class="prompts-panel">
+        <h4>✨ Guided prompts — click to insert</h4>
+        <div class="prompts-row">
+          <button class="prompt-chip" onclick="insertPrompt(this)" type="button">What am I grateful for today?</button>
+          <button class="prompt-chip" onclick="insertPrompt(this)" type="button">What's weighing on my mind?</button>
+          <button class="prompt-chip" onclick="insertPrompt(this)" type="button">One thing I'm proud of</button>
+          <button class="prompt-chip" onclick="insertPrompt(this)" type="button">A challenge I'm facing</button>
+          <button class="prompt-chip" onclick="insertPrompt(this)" type="button">How did I take care of myself?</button>
+          <button class="prompt-chip" onclick="insertPrompt(this)" type="button">What would I tell a friend?</button>
+        </div>
+      </div>
+
+      <div class="editor-footer">
+        <div class="save-status" id="saveStatus">
+          <span class="save-dot"></span> Not saved
+        </div>
+        <button class="btn btn-primary" onclick="saveEntry()" type="button" style="padding:9px 20px; font-size:0.88rem;">
+          <i class="fa fa-floppy-disk fa-sm"></i> Save Entry
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SCIENCE OF JOURNALING -->
+<section class="benefits-section">
+  <div style="text-align:center; max-width:600px; margin:0 auto;">
+    <span class="section-eyebrow">Why Journal?</span>
+    <h2 class="section-title">The science behind writing<br><em>for mental health</em></h2>
+  </div>
+
+  <div class="benefits-layout">
+    <div>
+      <div class="benefit-item">
+        <span class="benefit-num">1</span>
+        <div>
+          <h4>Reduces Anxiety &amp; Stress</h4>
+          <p>Writing organises thoughts and prevents mental clutter from spiraling into overwhelm. Putting feelings on paper moves them from the emotional brain to the reasoning brain.</p>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-num">2</span>
+        <div>
+          <h4>Improves Emotional Intelligence</h4>
+          <p>Naming feelings builds self-awareness over time. The act of labelling an emotion reduces its intensity — a process neuroscientists call "affect labelling."</p>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-num">3</span>
+        <div>
+          <h4>Enhances Problem-Solving</h4>
+          <p>Getting a problem on paper helps you see it more objectively. Distance creates clarity — solutions that were invisible in your head often become obvious on the page.</p>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-num">4</span>
+        <div>
+          <h4>Boosts Academic Performance</h4>
+          <p>Students who journal regularly report better focus, clearer thinking, and stronger motivation to engage with coursework.</p>
+        </div>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-num">5</span>
+        <div>
+          <h4>Strengthens Resilience</h4>
+          <p>Reflecting on challenges you've overcome builds confidence in your ability to handle future difficulties. The journal becomes proof of your strength.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-panel">
+      <span class="quote-mark">"</span>
+      <blockquote>Journal writing is a voyage to the interior.</blockquote>
+      <cite>— Christina Baldwin</cite>
+      <div class="tip-block">
+        <p>Even just <strong>10 minutes</strong> of free writing per day has measurable effects on mood regulation within 2–4 weeks.</p>
+        <p>You don't need to write well. You need to write <strong>honestly</strong>. Spelling, grammar, and structure don't matter here — only your truth does.</p>
+        <p>Try writing at the same time each day — morning pages to set intentions, or evening reflection to process the day.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="logo-text">🌿 MindSpace</span>
+      <p>A digital mental wellness platform by students of Mbarara University of Science and Technology.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Pages</h4>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="mood.html">Mood Tracker</a></li>
+        <li><a href="journal.html">Journal</a></li>
+        <li><a href="contact.php">Contact Us</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Emergency Help</h4>
+      <ul>
+        <li><a href="tel:+256800100066">Uganda Helpline: 0800 100 066</a></li>
+        <li><a href="tel:+256414340869">Mental Health Uganda</a></li>
+        <li><a href="tel:+256772100001">Campus Counselor</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 MindSpace — MUST · Faculty of Computing and Informatics</p>
+    <p>Built with ❤️ by Group Two, BIT Program</p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+  const STORAGE_KEY = 'mindspace_journal_v2';
+
+  function loadEntries() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { return []; }
+  }
+  function saveEntries(entries) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); } catch(e) {}
+  }
+
+  let entries = loadEntries();
+  let currentId = null;
+  let autoSaveTimer = null;
+
+  /* ---- RENDER SIDEBAR ---- */
+  function renderList(filter) {
+    const list = document.getElementById('entriesList');
+    let show = entries;
+    if (filter) {
+      const q = filter.toLowerCase();
+      show = entries.filter(e =>
+        (e.title||'').toLowerCase().includes(q) ||
+        (e.body||'').toLowerCase().includes(q)
+      );
+    }
+
+    if (show.length === 0) {
+      list.innerHTML = `<div class="no-entries-msg">${filter ? 'No results found.' : 'No entries yet.\nClick "+ New Entry" to begin.'}</div>`;
+    } else {
+      list.innerHTML = show.map(e => `
+        <div class="entry-item ${e.id === currentId ? 'active' : ''}" onclick="loadEntry(${e.id})">
+          <div class="ei-date">${e.date || ''}</div>
+          <div class="ei-title">${e.title || 'Untitled entry'}</div>
+          <div class="ei-preview">${(e.body || '').substring(0, 60)}</div>
+          ${e.mood ? `<div class="ei-tags"><span class="ei-tag">${e.mood}</span></div>` : ''}
+        </div>
+      `).join('');
+    }
+    document.getElementById('entryCountLabel').textContent =
+      entries.length + ' entr' + (entries.length === 1 ? 'y' : 'ies');
+  }
+
+  function filterEntries(val) { renderList(val); }
+
+  /* ---- SHOW / HIDE EDITOR ---- */
+  function showEditor() {
+    document.getElementById('emptyState').style.display = 'none';
+    const ec = document.getElementById('editorContainer');
+    ec.style.display = 'flex';
+    ec.style.flexDirection = 'column';
+    ec.style.overflow = 'hidden';
+    ec.style.flex = '1';
+  }
+
+  function hideEditor() {
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('editorContainer').style.display = 'none';
+  }
+
+  /* ---- LOAD ENTRY ---- */
+  function loadEntry(id) {
+    currentId = id;
+    const e = entries.find(x => x.id === id);
+    if (!e) return;
+    document.getElementById('entryTitle').value = e.title || '';
+    document.getElementById('entryBody').value  = e.body  || '';
+    document.getElementById('editorDate').textContent = e.date || '';
+    document.getElementById('entryMood').value = e.mood || '';
+    updateWordCount();
+    updateMoodDot();
+    setStatus('saved');
+    showEditor();
+    renderList(document.getElementById('searchInput').value);
+  }
+
+  /* ---- NEW ENTRY ---- */
+  function newEntry() {
+    const today = new Date().toLocaleDateString('en-UG', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const newE = { id: Date.now(), date: today, title: '', body: '', mood: '' };
+    entries.unshift(newE);
+    saveEntries(entries);
+    renderList();
+    loadEntry(newE.id);
+    document.getElementById('entryTitle').focus();
+  }
+
+  /* ---- SAVE ---- */
+  function saveEntry() {
+    if (currentId === null) { newEntry(); return; }
+    const idx = entries.findIndex(e => e.id === currentId);
+    if (idx === -1) return;
+    entries[idx].title = document.getElementById('entryTitle').value;
+    entries[idx].body  = document.getElementById('entryBody').value;
+    entries[idx].mood  = document.getElementById('entryMood').value;
+    saveEntries(entries);
+    renderList(document.getElementById('searchInput').value);
+    setStatus('saved');
+  }
+
+  /* ---- DELETE ---- */
+  function deleteEntry() {
+    if (currentId === null) return;
+    if (!confirm('Delete this entry? This cannot be undone.')) return;
+    entries = entries.filter(e => e.id !== currentId);
+    saveEntries(entries);
+    currentId = null;
+    renderList();
+    hideEditor();
+  }
+
+  /* ---- STATUS ---- */
+  function setStatus(state) {
+    const el = document.getElementById('saveStatus');
+    if (state === 'saved') {
+      el.className = 'save-status saved';
+      el.innerHTML = '<span class="save-dot"></span> All changes saved';
+    } else {
+      el.className = 'save-status';
+      el.innerHTML = '<span class="save-dot"></span> Unsaved changes…';
+    }
+  }
+
+  /* ---- AUTOSAVE ---- */
+  function triggerAutoSave() {
+    setStatus('unsaved');
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(saveEntry, 1800);
+  }
+
+  /* ---- WORD COUNT ---- */
+  function updateWordCount() {
+    const text = document.getElementById('entryBody').value.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    document.getElementById('wordCount').textContent = words + ' word' + (words === 1 ? '' : 's');
+  }
+
+  /* ---- MOOD DOT ---- */
+  function updateMoodDot() {
+    const mood = document.getElementById('entryMood').value;
+    const dot = document.getElementById('moodDot');
+    const lbl = document.getElementById('moodLabel');
+    if (mood) {
+      dot.style.display = 'block';
+      lbl.textContent = mood;
+    } else {
+      dot.style.display = 'none';
+      lbl.textContent = '';
+    }
+    triggerAutoSave();
+  }
+
+  /* ---- PROMPTS ---- */
+  function insertPrompt(btn) {
+    const body = document.getElementById('entryBody');
+    const prompt = '\n\n' + btn.textContent + '\n';
+    body.value += prompt;
+    body.focus();
+    updateWordCount();
+    triggerAutoSave();
+  }
+
+  /* ---- INIT ---- */
+  renderList();
+  if (entries.length) { loadEntry(entries[0].id); } else { hideEditor(); }
+</script>
+</body>
+</html>

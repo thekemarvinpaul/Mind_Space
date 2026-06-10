@@ -1,0 +1,218 @@
+    .page-hero { background: #2d7a55; }
+
+    .journal-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 24px;
+      padding: 50px 5%;
+      align-items: start;
+    }
+
+    /* SIDEBAR */
+    .journal-sidebar {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      background: #2d7a55;
+      color: white;
+      padding: 16px 18px;
+    }
+
+    .sidebar-header h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-header p {
+      font-size: 0.78rem;
+      opacity: 0.8;
+    }
+
+    .new-btn {
+      display: block;
+      width: 100%;
+      padding: 11px 18px;
+      background: var(--mint-light);
+      border: none;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: #2d7a55;
+      cursor: pointer;
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .new-btn:hover { background: #b8e8d0; }
+
+    .entries-list { max-height: 420px; overflow-y: auto; }
+
+    .entry-item {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .entry-item:hover,
+    .entry-item.active { background: var(--mint-light); }
+
+    .entry-item .ei-date {
+      font-size: 0.72rem;
+      color: var(--text-light);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .entry-item .ei-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .entry-item .ei-preview {
+      font-size: 0.76rem;
+      color: var(--text-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* EDITOR */
+    .journal-editor {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .editor-toolbar {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .word-count {
+      font-size: 0.78rem;
+      color: var(--text-light);
+    }
+
+    .editor-area { padding: 24px 28px; min-height: 400px; }
+
+    #entryTitle {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      background: transparent;
+      box-sizing: border-box;
+    }
+
+    #entryTitle::placeholder { color: #cbd5e1; }
+
+    .entry-meta {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    #entryBody {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.98rem;
+      line-height: 1.9;
+      color: var(--text);
+      resize: none;
+      min-height: 280px;
+      background: transparent;
+      box-sizing: border-box;
+    }
+
+    #entryBody::placeholder { color: #cbd5e1; }
+
+    .editor-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .save-btn {
+      background: #2d7a55;
+      color: white;
+      border: none;
+      padding: 9px 22px;
+      border-radius: 6px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+
+    .save-btn:hover { background: #235e40; }
+
+    .saved-msg {
+      font-size: 0.8rem;
+      color: var(--mint);
+      font-weight: 700;
+      display: none;
+    }
+
+    /* SCIENCE — text only, no image */
+    .benefits-section {
+      background: var(--grey);
+      padding: 50px 5%;
+    }
+
+    .benefits-inner {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .benefits-inner p {
+      font-size: 0.9rem;
+      color: var(--text-mid);
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+
+    .benefits-inner ol {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .benefits-inner ol li {
+      font-size: 0.9rem;
+      color: var(--text-mid);
+      line-height: 1.6;
+    }
+
+    .benefits-inner ol li strong { color: var(--text); }
+
+    @media (max-width: 900px) {
+      .journal-layout { grid-template-columns: 1fr; }
+    }
